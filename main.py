@@ -28,12 +28,12 @@ def check_exists_by_xpath(xpath):
 try:
     driver.get(url=url)
 
-    h_prev = 0
+    top_of_the_page = 0
     # scroll cycle
     while True:
         # scroll down
-        h = driver.execute_script('return window.innerHeight + window.scrollY;')
-        driver.execute_script(f'window.scrollTo(0,{h});')
+        bottom_of_the_page = driver.execute_script('return window.innerHeight + window.scrollY;')
+        driver.execute_script(f'window.scrollTo(0,{bottom_of_the_page});')
         time.sleep(2)
 
         # get a block of all NFT
@@ -54,9 +54,9 @@ try:
                 info_dict['href'].append(href)
 
         # compare the new scroll height with the old one
-        if h == h_prev:
+        if bottom_of_the_page == top_of_the_page:
             break
-        h_prev = h
+        top_of_the_page = bottom_of_the_page
 
     # open NFT pages, check statistics existence, add to the list
     for href in info_dict['href']:
