@@ -37,15 +37,15 @@ try:
         time.sleep(2)
 
         # get a block of all NFT
-        block = driver.find_element(By.CSS_SELECTOR, '#main > div > div:nth-child(3) > div > div > div')
+        several_loaded_NFTs = driver.find_element(By.CSS_SELECTOR, '#main > div > div:nth-child(3) > div > div > div')
 
         # get all NFT names, check for absence in the list and add to the list
-        for name in block.text.split('\n'):
+        for name in several_loaded_NFTs.text.split('\n'):
             if name not in info_dict['name']:
                 info_dict['name'].append(name)
 
         # get NFT urls, check for absence in the list and add to the list
-        elements = block.find_elements(
+        elements = several_loaded_NFTs.find_elements(
             By.CSS_SELECTOR, '#main > div > div:nth-child(3) > div > div > div > div > div > a'
         )
         for element in elements:
