@@ -10,10 +10,8 @@ driver = webdriver.Chrome()
 
 driver.implicitly_wait(10)
 
-# to collect the necessary information and transfer to csv
-info_dict = {'name': [],
-             'best offer': [],
-             'href': []}
+# to collect the necessary information about NFT
+info_dict = {}
 
 
 # the function checks if there is an element with statistics on the page
@@ -36,22 +34,16 @@ try:
         driver.execute_script(f'window.scrollTo(0,{bottom_of_the_page});')
         time.sleep(2)
 
-        # get a block of all NFT
+        # get a block of all NFT which managed to boot
         several_loaded_NFTs = driver.find_element(By.CSS_SELECTOR, '#main > div > div:nth-child(3) > div > div > div')
 
-        # get all NFT names, check for absence in the list and add to the list
-        for name in several_loaded_NFTs.text.split('\n'):
-            if name not in info_dict['name']:
-                info_dict['name'].append(name)
-
-        # get NFT urls, check for absence in the list and add to the list
-        elements = several_loaded_NFTs.find_elements(
+        list_of_several_loaded_NFTs = several_loaded_NFTs.find_elements(
             By.CSS_SELECTOR, '#main > div > div:nth-child(3) > div > div > div > div > div > a'
         )
-        for element in elements:
-            href = element.get_attribute('href')
-            if href not in info_dict['href']:
-                info_dict['href'].append(href)
+        for NFT in list_of_several_loaded_NFTs:
+            NFT_name = NFT.text
+            href = NFT.get_attribute('href')
+            info_dict.setdefault(NFT, [NFT_name, href])
 
         # compare the new scroll height with the old one
         if bottom_of_the_page == top_of_the_page:
@@ -59,15 +51,16 @@ try:
         top_of_the_page = bottom_of_the_page
 
     # open NFT pages, check statistics existence, add to the list
-    for href in info_dict['href']:
+    for NFT in info_dict:
+        href = info_dict[NFT][1]
         driver.get(href)
-        if check_exists_by_xpath('//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'):
-            element = driver.find_element(
-                By.XPATH, '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
+        if check_exists_by_xpath(
+                        '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
+        ):
+            statistics = driver.find_element(
+                        By.XPATH, '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
             )
-            info_dict['best offer'].append(element.text)
-        else:
-            info_dict['best offer'].append(None)
+            info_dict[NFT].append(statistics.text)
 
 except Exception as ex:
     print(ex)
@@ -77,5 +70,6 @@ finally:
     driver.quit()
 
 # write data to csv file
-df = pd.DataFrame(info_dict)
+df = pd.DataFrame.from_dict(info_dict, orient='index')
+df.columns = ["NFT name", "href", "best offer"]
 df.to_csv('NFT.csv')
