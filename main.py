@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 import time
 from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
+from pathlib import Path
 
 url = 'https://opensea.io/explore-collections'
 
@@ -72,4 +73,7 @@ finally:
 # write data to csv file
 df = pd.DataFrame.from_dict(info_dict, orient='index')
 df.columns = ["NFT name", "href", "best offer"]
-df.to_csv('NFT.csv')
+absolute_path_to_the_current_directory = Path.cwd()
+Path(absolute_path_to_the_current_directory, 'result').mkdir()
+NFT_csv_path = Path(absolute_path_to_the_current_directory, 'result', 'NFT.csv')
+df.to_csv(NFT_csv_path)
