@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 import time
 from selenium.common.exceptions import NoSuchElementException
@@ -7,8 +6,7 @@ import pandas as pd
 
 url = 'https://opensea.io/explore-collections'
 
-s = Service("C:/Users/anast/PycharmProjects/opensea-parser/chromedriver/chromedriver.exe")
-driver = webdriver.Chrome(service=s)
+driver = webdriver.Chrome()
 
 driver.implicitly_wait(10)
 
