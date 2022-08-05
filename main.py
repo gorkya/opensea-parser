@@ -20,8 +20,7 @@ def check_exists_by_xpath(xpath):
     try:
         driver.find_element(By.XPATH, xpath)
     except NoSuchElementException:
-        return False
-    return True
+        raise NoSuchElementException('error occurred')
 
 
 try:
@@ -51,17 +50,17 @@ try:
             break
         top_of_the_page = bottom_of_the_page
 
-    # open NFT pages, check statistics existence, add to the list
+    # open NFT pages, check statistics existence, add to the dict
+    xpath = '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
     for NFT in info_dict:
         href = info_dict[NFT][1]
         driver.get(href)
-        if check_exists_by_xpath(
-                        '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
-        ):
-            statistics = driver.find_element(
-                        By.XPATH, '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
-            )
+        try:
+            check_exists_by_xpath(xpath)
+            statistics = driver.find_element(By.XPATH, xpath)
             info_dict[NFT].append(statistics.text)
+        except NoSuchElementException:
+            continue
 
 except Exception as ex:
     print(ex)
