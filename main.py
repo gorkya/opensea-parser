@@ -11,8 +11,16 @@ driver = webdriver.Chrome()
 
 driver.implicitly_wait(10)
 
-# to collect the necessary information about NFT
-info_dict = {}
+# collect information about all NFT
+info_list = []
+
+
+class NFTItem:
+    """collect the necessary information about each NFT"""
+    def __init__(self, name, link, best_offer=None):
+        self.name = name
+        self.best_offer = best_offer
+        self.link = link
 
 
 # the function checks if there is an element with statistics on the page
@@ -40,10 +48,9 @@ try:
         list_of_several_loaded_NFTs = several_loaded_NFTs.find_elements(
             By.CSS_SELECTOR, '#main > div > div:nth-child(3) > div > div > div > div > div > a'
         )
-        for NFT in list_of_several_loaded_NFTs:
-            NFT_name = NFT.text
-            href = NFT.get_attribute('href')
-            info_dict.setdefault(NFT, [NFT_name, href])
+        for webelement in list_of_several_loaded_NFTs:
+            NFT = NFTItem(webelement.text, webelement.get_attribute('href'))
+            info_list.append(NFT)
 
         # compare the new scroll height with the old one
         if bottom_of_the_page == top_of_the_page:
@@ -52,13 +59,12 @@ try:
 
     # open NFT pages, check statistics existence, add to the dict
     xpath = '//*[@id="main"]/div/div/div[5]/div/div[1]/div/div[3]/div/div[10]/a/div/span[1]/div'
-    for NFT in info_dict:
-        href = info_dict[NFT][1]
-        driver.get(href)
+    for NFT in info_list:
+        driver.get(NFT.link)
         try:
             check_exists_by_xpath(xpath)
             statistics = driver.find_element(By.XPATH, xpath)
-            info_dict[NFT].append(statistics.text)
+            NFT.best_offer = statistics.text
         except NoSuchElementException:
             continue
 
@@ -70,8 +76,9 @@ finally:
     driver.quit()
 
 # write data to csv file
-df = pd.DataFrame.from_dict(info_dict, orient='index')
-df.columns = ["NFT name", "href", "best offer"]
+df = pd.DataFrame.from_dict(
+    {NFT.name: [NFT.best_offer, NFT.link] for NFT in info_list}, orient='index', columns=['best offer', 'link']
+)
 absolute_path_to_the_current_directory = Path.cwd()
 Path(absolute_path_to_the_current_directory, 'result').mkdir()
 NFT_csv_path = Path(absolute_path_to_the_current_directory, 'result', 'NFT.csv')
