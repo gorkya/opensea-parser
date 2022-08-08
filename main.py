@@ -75,11 +75,17 @@ finally:
     driver.close()
     driver.quit()
 
+
 # write data to csv file
+def dump_file(df):
+    root_dir_path = Path(__file__).parent.absolute()
+    result = root_dir_path / 'result'
+    result.mkdir(exist_ok=True)
+    NFT_csv_path = result / 'NFT.csv'
+    df.to_csv(NFT_csv_path)
+
+
 df = pd.DataFrame.from_dict(
-    {NFT.name: [NFT.best_offer, NFT.link] for NFT in info_list}, orient='index', columns=['best offer', 'link']
+        {NFT.name: [NFT.best_offer, NFT.link] for NFT in info_list}, orient='index', columns=['best offer', 'link']
 )
-absolute_path_to_the_current_directory = Path.cwd()
-Path(absolute_path_to_the_current_directory, 'result').mkdir()
-NFT_csv_path = Path(absolute_path_to_the_current_directory, 'result', 'NFT.csv')
-df.to_csv(NFT_csv_path)
+dump_file(df)
