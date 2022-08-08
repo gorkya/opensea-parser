@@ -19,8 +19,8 @@ class NFTItem:
     """collect the necessary information about each NFT"""
     def __init__(self, name, link, best_offer=None):
         self.name = name
-        self.best_offer = best_offer
         self.link = link
+        self.best_offer = best_offer
 
 
 # the function checks if there is an element with statistics on the page
